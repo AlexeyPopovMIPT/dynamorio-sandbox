@@ -1,0 +1,21 @@
+// Example of input file for "declarer" tool. Has to contain which instrument 
+// will be used (e.g. QEMU, DynamoRIO) and which roles are determined.
+{
+    "declarer_target_instrument": "DynamoRIO", // no need?
+
+    "Send": {
+        "name": "sendto",
+        "args": [
+            "Descriptor", "Buffer", "Size", "Flags", "Ptr_to_Sockaddr", 
+            "Socklen"
+        ]
+    },
+
+    "Recv": {
+        "name": "recvfrom",
+        "args": [
+            "Descriptor", "Buffer", "Size", "Flags", "Ptr_to_Sockaddr", 
+            "Ptr_to_Socklen"
+        ]
+    }
+}
