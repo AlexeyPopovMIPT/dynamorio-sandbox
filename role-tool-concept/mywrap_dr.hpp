@@ -1,13 +1,13 @@
-#ifndef WRAPPERPP_IMPL
-#define WRAPPERPP_IMPL
+#ifndef MYWRAP_IMPL
+#define MYWRAP_IMPL
 
-#include "wrapperpp_api.hpp"
-#include "wrapperpp_role_config.hpp"
+#include "mywrap_api.hpp"
+#include "mywrap_role_config.hpp"
 #include <cassert>
-#include "../../include/dr_api.h"
+#include "../../include/dr_api.h" // TODO как нормально включать DynamoRIO
 #include "../../ext/include/drwrap.h"
 
-namespace wrapperpp {
+namespace mywrap {
 
 struct drWrapContext;
 struct drForwardList;
@@ -16,7 +16,7 @@ using IFunc = Proto_IFunc<drWrapContext, drForwardList>;
 
 struct drForwardList {
     struct Node{
-        Arg val;
+        WordSizeCell val;
         Node *next;
     };
     Node *head;
@@ -29,7 +29,7 @@ struct drForwardList {
         dr_global_free (ptr, sz);
     }
 
-    void push (Arg value) {
+    void push (WordSizeCell value) {
         Node *new_node = (Node *) allocate (sizeof (Node));
         new_node->val = value;
         Node *old_head = head;
@@ -37,9 +37,9 @@ struct drForwardList {
         head->next = old_head;
     }
 
-    Arg pop () {
+    WordSizeCell pop () {
         assert (head != nullptr);
-        Arg ret = head->val;
+        WordSizeCell ret = head->val;
         Node *new_head = head->next;
         dr_global_free (head, sizeof (Node));
         head = new_head;
@@ -50,25 +50,25 @@ struct drForwardList {
 struct drWrapContext {
     void *wrapcxt;
 
-    Arg get_arg (const IFunc &func, const char *arg_name) const {
+    WordSizeCell get_arg (const IFunc &func, const char *arg_name) const {
         return 
         drwrap_get_arg (wrapcxt, func_arg_to_num[{func.name, arg_name}]);
     }
-    bool set_arg (const IFunc &func, const char *arg_name, Arg val) {
+    bool set_arg (const IFunc &func, const char *arg_name, WordSizeCell val) {
         return 
         drwrap_set_arg (wrapcxt, func_arg_to_num[{func.name, arg_name}], val);
     }
 
-    Arg get_retval () const {
+    WordSizeCell get_retval () const {
         return
         drwrap_get_retval (wrapcxt);
     }
-    bool set_retval (Arg val) {
+    bool set_retval (WordSizeCell val) {
         return
         drwrap_set_retval (wrapcxt, val);
     }
 };
 
-} // namespace wrapperpp
+} // namespace mywrap
 
-#endif // !WRAPPERPP_IMPL
+#endif // !MYWRAP_IMPL

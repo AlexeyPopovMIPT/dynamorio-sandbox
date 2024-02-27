@@ -76,12 +76,15 @@ static void
 wrap_pre_recv (void *wrapcxt, DR_PARAM_OUT void **user_data);
 static void
 wrap_pre_recvfrom (void *wrapcxt, DR_PARAM_OUT void **user_data);
+static void
+wrap_pre_print_pair (void *wrapcxt, DR_PARAM_OUT void **user_data);
 
 const char* OUT_FILE = "output.log";
 
 static void
 module_load_event(void *drcontext, const module_data_t *mod, bool loaded)
 {
+    dr_fprintf (STDERR, "Load module %s\n", mod->full_path);
     app_pc towrap = (app_pc)dr_get_proc_address(mod->handle, "send");
     if (towrap != NULL) {
         bool ok = drwrap_wrap(towrap, wrap_pre_send, NULL);
@@ -137,6 +140,17 @@ module_load_event(void *drcontext, const module_data_t *mod, bool loaded)
             DR_ASSERT(ok);
         }
     }
+
+    towrap = (app_pc)dr_get_proc_address(mod->handle, "print_pair");
+    if (towrap != NULL) {
+        bool ok = drwrap_wrap(towrap, wrap_pre_print_pair, NULL);
+        if (!ok) {
+            dr_fprintf(STDERR, "Couldn't wrap print_pair\n");
+            DR_ASSERT(ok);
+        } else {
+            dr_fprintf(STDERR, "Wrapped print_pair\n");
+        }
+    }
 }
 
 static void
@@ -164,6 +178,10 @@ dr_init (client_id_t id)
     drmgr_register_module_load_event (module_load_event);
 }
 
+static void
+wrap_pre_print_pair (void *wracxt, DR_PARAM_OUT void **user_data) {
+    drwrap_set_arg (wracxt, 0, (void*)0xffffffffffffffffLLU);
+}
 
 /* Used by ping */
 static void
