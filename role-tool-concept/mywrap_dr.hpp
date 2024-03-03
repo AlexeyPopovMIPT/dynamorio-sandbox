@@ -9,54 +9,24 @@
 
 namespace mywrap {
 
-struct drWrapContext;
-struct drForwardList;
+struct drService;
 
-using IFunc = Proto_IFunc<drWrapContext, drForwardList>;
+using Func = ProtoFunc<drService>;
 
-struct drForwardList {
-    struct Node{
-        WordSizeCell val;
-        Node *next;
-    };
-    Node *head;
-
-    void *allocate (size_t sz) {
-        return dr_global_alloc (sz);
-    }
-
-    void cleance (void *ptr, size_t sz) {
-        dr_global_free (ptr, sz);
-    }
-
-    void push (WordSizeCell value) {
-        Node *new_node = (Node *) allocate (sizeof (Node));
-        new_node->val = value;
-        Node *old_head = head;
-        head = new_node;
-        head->next = old_head;
-    }
-
-    WordSizeCell pop () {
-        assert (head != nullptr);
-        WordSizeCell ret = head->val;
-        Node *new_head = head->next;
-        dr_global_free (head, sizeof (Node));
-        head = new_head;
-        return ret;
-    }
-};
-
-struct drWrapContext {
+struct drService {
     void *wrapcxt;
 
-    WordSizeCell get_arg (const IFunc &func, const char *arg_name) const {
+    explicit drService (void *wrapcxt): wrapcxt(wrapcxt) {}
+
+    WordSizeCell get_arg (const char *arg_name) const {
+        const Func *func = static_cast<const Func *>(this);
         return 
-        drwrap_get_arg (wrapcxt, func_arg_to_num[{func.name, arg_name}]);
+        drwrap_get_arg (wrapcxt, func_arg_to_num[{func->name, arg_name}]);
     }
-    bool set_arg (const IFunc &func, const char *arg_name, WordSizeCell val) {
+    bool set_arg (const char *arg_name, WordSizeCell val) {
+        const Func *func = static_cast<const Func *>(this);
         return 
-        drwrap_set_arg (wrapcxt, func_arg_to_num[{func.name, arg_name}], val);
+        drwrap_set_arg (wrapcxt, func_arg_to_num[{func->name, arg_name}], val);
     }
 
     WordSizeCell get_retval () const {
@@ -67,6 +37,15 @@ struct drWrapContext {
         return
         drwrap_set_retval (wrapcxt, val);
     }
+
+    static void *allocate (size_t sz) {
+        return dr_global_alloc (sz);
+    }
+
+    static void cleance (void *ptr, size_t sz) {
+        dr_global_free (ptr, sz);
+    }
+
 };
 
 } // namespace mywrap

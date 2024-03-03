@@ -1,3 +1,7 @@
+#ifndef MYWRAP_IMPL
+#error This is an internal header, don't use it directly.
+#endif
+
 #ifndef MYWRAP_API_HPP
 #define MYWRAP_API_HPP
 
@@ -20,15 +24,22 @@ public:
     }
 };
 
-// for every ToolContext class that has get_arg, set_arg, get_retval, set_retval methods
-template <class ToolContext, class ForwardList>
-class Proto_IFunc : public ToolContext, public ForwardList {
+
+template <class ToolService>
+class ProtoFunc : public ToolService {
 public:
     const char *name;
-    virtual void wrap_pre () = 0;
-    virtual void wrap_post () = 0;
+
+    ProtoFunc (const char *func_name, const ToolService &srv):
+        ToolService (srv),
+        name (func_name)
+    {}
+
+    void wrap_pre () {}
+    void wrap_post () {}
+
 protected: 
-    ~Proto_IFunc () {}
+    ~ProtoFunc () {}
 };
 
 
