@@ -30,6 +30,9 @@
  * DAMAGE.
  */
 
+/*
+ * Такой файл должен генерироваться из YAML
+ */
 #include "dr_api.h"
 #include "drwrap.h"
 #include "drmgr.h"
@@ -88,7 +91,7 @@ static void
 wrap_post_Send_sendto (void *wrapcxt, void *user_data)
 {
     Send *func = (Send *) user_data;
-    func->wrapcxt = wrapcxt;
+    func->to_post_cb (wrapcxt);
     func->wrap_post ();
     func->~Send();
     dr_global_free (func, sizeof (Send));

@@ -24,7 +24,10 @@ public:
     }
 };
 
-
+/* User inherits a class for each role from Func (using directive of this class)
+   and defines wrap_pre () and wrap_post () for it. wrap_pre () is called before
+   the target function is executed and wrap_post () is called after, with 
+   (almost) same *this (ToolService part is changed) */
 template <class ToolService>
 class ProtoFunc : public ToolService {
 public:
